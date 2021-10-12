@@ -26,7 +26,6 @@ const prefix = "!";
 const guildMembers = [
     'Gods', 
     'Austenthefirst',
-    'Wysteria',
     'Overdrawn',
     'Staryx',
     'Pink',
@@ -153,7 +152,7 @@ fs.readdir(directoryPathTwo, function(err, files) {
     const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] })
 
     // && lastIdRead !== lastIdSent was removed from the following entry IF statement in the interval
-    // This function reiterates every 5 seconds and checks if there has been a new message.
+    // This function reiterates every 250 ms and checks if there has been a new message.
     setInterval(() => {
 
         if (lastDataPacket.length > 0 && dataPacketNo > 1 && !amIBusy) {
