@@ -1,8 +1,8 @@
-import pyautogui
-import time
-import win32gui
-import os
 import pywinauto
+import pyautogui
+import win32gui
+import time
+import os
 
 def login():
 
