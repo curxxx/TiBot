@@ -8,6 +8,12 @@ No duplication, no modification, no nothing. Fah Q.
 
 */
 
+// TO DO
+/*
+- Guild member spreadsheet or at least text file?
+*/
+
+
 //Main Imports
 const Discord = require("discord.js");
 const { MessageEmbed } = require('discord.js');
@@ -553,13 +559,6 @@ async function relaunchGame() {
         console.log('NOT PROCEEDING WITH RESTART!!!')
     } 
 }
-
-// TO DO
-/*
-- Add chatlogs to physical file instead of lastLine so it can handle being restarted
-- Auto-login python script using image recognition....? 
-- Guild member spreadsheet or at least text file?
-*/
 
 function prepareEmbed(str) {
 
