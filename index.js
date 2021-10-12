@@ -11,7 +11,7 @@ No duplication, no modification, no nothing. Fah Q.
 //Main Imports
 const Discord = require("discord.js");
 const { MessageEmbed } = require('discord.js');
-const config = require("./config.json"); //Only contains the token, and nothing but.
+const config = require("./config.json"); //Only contains the Discord token.
 const fs = require('fs');
 const path = require('path');
 const TailingReadableStream = require('tailing-stream');
