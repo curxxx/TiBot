@@ -2,7 +2,7 @@
 Ti - Heroes Over Legends, et al. (Heroes Over All)
 Official Discord Bot, No. 1
 
-(C) Copyright 2021+ Austen-Dale Patterson. All Rights Reserved
+(C) Copyright 2021+ Austen-Dale. All Rights Reserved
 
 No duplication, no modification, no nothing. Fah Q.
 
