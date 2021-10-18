@@ -2,22 +2,16 @@
 Ti - Heroes Over Legends, et al. (Heroes Over All)
 Official Discord Bot, No. 1
 
-(C) Copyright 2021+ Austen-Dale. All Rights Reserved
+(C) Copyright 2021+ Austen-Dale Patterson. All Rights Reserved
 
 No duplication, no modification, no nothing. Fah Q.
 
 */
 
-// TO DO
-/*
-- Guild member spreadsheet or at least text file?
-*/
-
-
 //Main Imports
 const Discord = require("discord.js");
 const { MessageEmbed } = require('discord.js');
-const config = require("./config.json"); //Only contains the Discord token.
+const config = require("./config.json"); //Only contains the token, and nothing but.
 const fs = require('fs');
 const path = require('path');
 const TailingReadableStream = require('tailing-stream');
@@ -32,6 +26,7 @@ const prefix = "!";
 const guildMembers = [
     'Gods', 
     'Austenthefirst',
+    'Wysteria',
     'Overdrawn',
     'Staryx',
     'Pink',
@@ -54,7 +49,16 @@ const guildMembers = [
     'Spectre',
     'Maniacmanik',
     'Vertam',
-    'Okhand'
+    'Okhand',
+    'Gypsy',
+    'Heir',
+    'Baestra',
+    'Fylakris',
+    'Sketh',
+    'Bealbree',
+    'Hambonerr',
+    'Althyr',
+    'Astriid'
 ];
 
 
@@ -75,6 +79,7 @@ var lastPlayerInteractedWith = '';
 var lastPlayerInvited = '';
 var lastPlayerToMessageMe = '';
 var restarting = false;
+var actionQueue = [];
 
 if (lowestEarner === "TiBot") {
     openLogFile()
@@ -136,7 +141,7 @@ function determineChannel(str) {
         break;
 
         case '(Guild)':
-            channelId = '890617783258324992';
+            channelId = '890617783258324992'; //
         break;
 
         default:
@@ -158,10 +163,10 @@ fs.readdir(directoryPathTwo, function(err, files) {
     const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES"] })
 
     // && lastIdRead !== lastIdSent was removed from the following entry IF statement in the interval
-    // This function reiterates every 250 ms and checks if there has been a new message.
+    // This function reiterates every 5 seconds and checks if there has been a new message.
     setInterval(() => {
 
-        if (lastDataPacket.length > 0 && dataPacketNo > 1 && !amIBusy) {
+        if (lastDataPacket.length > 0 && lastDataPacket.length < 10 && dataPacketNo > 1 && !amIBusy && !restarting) {
             console.log('Found full DataPacket...');
             console.dir(lastDataPacket);
 
@@ -175,7 +180,7 @@ fs.readdir(directoryPathTwo, function(err, files) {
 
                 var determinedChannel = determineChannel(v)
 
-                if (determinedChannel.length > 1) {
+                if (determinedChannel.length > 1 && !amIBusy && !restarting) {
                     var determinedType = determineMessageType(v)
 
                     console.log('determinedMessageType is ' + determinedType)
@@ -307,19 +312,40 @@ fs.readdir(directoryPathTwo, function(err, files) {
                             console.log(joined);
                             let isNowOffline = (joined.indexOf('offline') > -1);
                             let isNowOnline = (joined.indexOf('online') > -1);
-                            console.log(`${isNowOffline} ${isNowOnline}`);
+                            //console.log(`${isNowOffline} ${isNowOnline}`);
                             let type = determineMessageType(v);
                             let type2 = type.replace("(","[");
                             let type3 = type2.replace(")","]");
-                            console.log(`${type} ${type2} ${type3}`);
-                            var name = split[0];
+                            //console.log(`${type} ${type2} ${type3}`);
+                            var name = ''
 
-                            if (name === "Pink") {
-                                name = "Pink-Fish";
+                            if (joined.indexOf('is now online.') > -1) {
+                                name = joined.split('is now online.')[0].trim().replace(' ','-')
+                            } else {
+                                var name = split[0].trim();
                             }
 
+                            
                             if (isNowOnline) {
-                                sendInGameInvite(name)
+                                console.log('Guildie logged in');
+                                console.log(name)
+                                if (name === 'Benazz') {
+                                    console.log('Benzy logged in');
+                                    sendInGameGuildMessage('BENNNZZZYYYY!').then(resp => {
+                                        setTimeout(function() {
+                                            sendInGameInvite(name)
+                                        }, 2000)
+                                    });
+                                } else if (name === 'Austenthefirst') {
+                                    console.log('Austen logged in');
+                                    sendInGameGuildMessage('Austen has joined the party!').then(resp => {
+                                        setTimeout(function() {
+                                            sendInGameInvite(name)
+                                        }, 2000)
+                                    });                  
+                                } else {
+                                    sendInGameInvite(name)
+                                }
                             }
                             if (determinedType === "(Guild)" || isNowOffline || isNowOnline) {
                                 channel.send(`${joined}`);
@@ -334,16 +360,17 @@ fs.readdir(directoryPathTwo, function(err, files) {
             });
             lastDataPacket = [];
         } else {
-            if (dataPacketNo === 1) {
+            if (dataPacketNo === 1 && lastDataPacket.length === 1 && !amIBusy) {
                 let lastLine = lastDataPacket[(lastDataPacket.length-1)]
                 let wasChatLogClosed = ((lastLine.indexOf('Chat Log Closed') > -1) || ((lastLine.indexOf("Left the") > -1) && (lastLine.indexOf("Server") > -1)));
 
                 if (wasChatLogClosed) {
                     relaunchGame();
-                    dataPacketNo++
-                    lastDataPacket = [];
+                    //dataPacketNo++
+                } else {
+                    //dataPacketNo++
                 }
-                
+                lastDataPacket = [];
             }
         }
     }, 250);
@@ -356,10 +383,10 @@ fs.readdir(directoryPathTwo, function(err, files) {
             dataPacketNo++;
             lastLineFull = buffer.toString();
             let lines = lastLineFull.split('\r\n');
-            console.log('Going over ' + lines.length + ' lines...');
+            console.log('Going over ' + lines.length + ' lines... in dataPacketNo ' + dataPacketNo);
 
             lines.forEach(function(v, i) { 
-                console.log('Iterating over line: ' + v);
+                console.log('[DP: ' + dataPacketNo + '] Iterating over line: ' + v);
                 let split = v.split(" "); //Split data stream up by SPACES
                 if (split.length > 1) {
                     let splice = split.splice(0,2); // Remove the first 2 elements of the array, which is the ID and channel
@@ -374,6 +401,35 @@ fs.readdir(directoryPathTwo, function(err, files) {
             //}
             console.log('Finished DataPacket:');
             console.dir(lastDataPacket);
+        }
+    });
+
+    client.on('guildMemberAdd', member => {
+        console.log('newMemberAdded')
+        client.channels.fetch('899040998347391026').then(channel => {
+            channel.send("Hi there! What's your main character's in-game name?")
+        });
+    });
+
+    client.on('messageCreate', async message => {
+        let whereFrom = message.channelId;
+        if (message.author.bot) return;
+
+        if (message.channel.type === 'GUILD_TEXT') {
+            client.channels.fetch(whereFrom).then((channel) => {
+                if (message.channelId === "899040998347391026") {
+                    message.member.setNickname(message.content).then(resp => {
+                        channel.send(`Nickname set! Hopefully that looks right. If not, contact a council member.`).then(resp => {
+                            var role = message.member.addRole('Recruit');
+
+                            channel.send(`You'll be placed into a temporary group while you await permanent assignment.`);
+                            message.guild.fetchMember(message.author).then(guildMember => {
+                                guildMember.addRole(role)
+                            });
+                        });
+                    })
+                }
+            });
         }
     });
 
@@ -540,6 +596,25 @@ async function sendInGameInvite(player) {
     } 
 }
 
+async function sendInGameGuildMessage(msg, isTibot = false) {
+    console.log('ACTING AS A VESSEL: ' + msg)
+
+
+    
+    if (!amIBusy) {
+        amIBusy = true;
+        let newMsg = msg.replace(' ','-');
+        let inviteProcess = spawn('python',["entertext.py", 'guild', newMsg]);
+
+        inviteProcess.on('close', (code) => {
+            amIBusy = false;
+            return code;
+        })
+    } else {
+
+    } 
+}
+
 async function relaunchGame() {
     console.log('GAME RESTART REQUESTED')
 
@@ -551,14 +626,21 @@ async function relaunchGame() {
         let relaunchProcess = spawn('python',["loginscript.py"]);
 
         relaunchProcess.on('close', (code) => {
-            setTimeout(function () {
+            //setTimeout(function () {
                 process.exit();
-            }, 75000);
+            //}, 75000);
         })
     } else {
         console.log('NOT PROCEEDING WITH RESTART!!!')
     } 
 }
+
+// TO DO
+/*
+- Add chatlogs to physical file instead of lastLine so it can handle being restarted
+- Auto-login python script using image recognition....? 
+- Guild member spreadsheet or at least text file?
+*/
 
 function prepareEmbed(str) {
 
